@@ -72,6 +72,7 @@ Int16 sin_tab_7500(void);
 
 unsigned long int i = 0;
 
+// The f=1.000 Hz table with the corresponding index variable
 int sin_1k_q1_index = 0;
 Int16 sin_1k_q1[48] = {0x0000,
                        0x0887,
@@ -122,6 +123,7 @@ Int16 sin_1k_q1[48] = {0x0000,
                        0xF778,
                        0xFFFF};
 
+// The f=7.500 Hz table with the corresponding index variable
 int sin_75k_q1_index = 0;
 Int16 sin_75k_q1[32] = {0x0000,
                         0x3650,
@@ -186,13 +188,12 @@ void main(void) {
     asm(" bclr XF"); // assembler code | bit clear XF -> steuert LED auf dem Board
     // bset XF
    
-    for (i = 0; i < SAMPLES_PER_SECOND * 600000L; i++) {
+    for(;;) {
         aic3204_codec_read(&left_input, &right_input); // Configured for one interrupt per two channels.
 
         mono_input = stereo_to_mono(left_input, right_input);
 
-        //left_output =  left_input;            // Very simple processing. Replace with your own code!
-        //right_output = right_input;          // Directly connect inputs to outputs.
+        // assign the calculated sine-values to the corresponding audio channels
         right_output = sin_tab_1000();
         left_output = sin_tab_7500();
 
@@ -206,13 +207,18 @@ void main(void) {
     SW_BREAKPOINT;
 }
 
-
+/**
+ * Calculates the current sine value for f=1.000 Hz
+ */
 Int16 sin_tab_1000() {
     if(sin_1k_q1_index > 47)
         sin_1k_q1_index = 0;
     return sin_1k_q1[sin_1k_q1_index++];
 }
 
+/**
+ * Calculates the current sine value for f=1.000 Hz
+ */
 Int16 sin_tab_7500() {
     if(sin_75k_q1_index > 31)
         sin_75k_q1_index = 0;
